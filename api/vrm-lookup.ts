@@ -6,10 +6,32 @@ const VRM_LOOKUP_URL = 'https://vrm.mamsoft.co.uk/vrmlookup/vrmlookup.asmx/Find'
 const DEFAULT_USERNAME = 'ASPGWS';
 const DEFAULT_PASSWORD = 'FK6NG8E3';
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+};
+
 export default async function handler(req: Request): Promise<Response> {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   // Only allow GET requests for Shopify proxy compatibility
   if (req.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', {
+      status: 405,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders,
+      },
+    });
   }
 
   const url = new URL(req.url);
@@ -22,7 +44,10 @@ export default async function handler(req: Request): Promise<Response> {
       JSON.stringify({ error: 'VRM parameter is required' }),
       {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       }
     );
   }
@@ -79,8 +104,7 @@ export default async function handler(req: Request): Promise<Response> {
       status: 200,
       headers: {
         'Content-Type': 'application/xml',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
+        ...corsHeaders,
       },
     });
   } catch (error) {
@@ -92,7 +116,10 @@ export default async function handler(req: Request): Promise<Response> {
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       }
     );
   }
