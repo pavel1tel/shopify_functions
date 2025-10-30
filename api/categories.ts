@@ -118,16 +118,15 @@ function parseXmlResponse(xmlResponse: string): Category[] {
       .replace(/<script[^>]*\/>/g, '')
       .trim();
 
-    // Use DOMParser to parse XML
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(cleanedXml, 'text/xml');
-
     const categories: Category[] = [];
-    const pgTypeNodes = xmlDoc.getElementsByTagName('PGType');
 
-    for (let i = 0; i < pgTypeNodes.length; i++) {
-      const pgTypeElement = pgTypeNodes[i] as Element;
-      const pgValue = pgTypeElement.getAttribute('pg');
+    // Use regex to find PGType elements
+    const pgTypeRegex = /<PGType[^>]*pg="([^"]*)"[^>]*>(.*?)<\/PGType>/gis;
+    let pgTypeMatch;
+
+    while ((pgTypeMatch = pgTypeRegex.exec(cleanedXml)) !== null) {
+      const pgValue = pgTypeMatch[1];
+      const pgTypeContent = pgTypeMatch[2];
 
       if (!pgValue) continue;
 
@@ -138,11 +137,11 @@ function parseXmlResponse(xmlResponse: string): Category[] {
 
       // Parse subcategories
       const subcategories: Subcategory[] = [];
-      const spgNodes = pgTypeElement.getElementsByTagName('spg');
+      const spgRegex = /<spg[^>]*>([^<]*)<\/spg>/gi;
+      let spgMatch;
 
-      for (let j = 0; j < spgNodes.length; j++) {
-        const spgElement = spgNodes[j] as Element;
-        const spgValue = spgElement.textContent || '';
+      while ((spgMatch = spgRegex.exec(pgTypeContent)) !== null) {
+        const spgValue = spgMatch[1];
 
         // Parse subcategory code and name from format "CODE^Name"
         const subcategoryParts = spgValue.split('^', 2);
