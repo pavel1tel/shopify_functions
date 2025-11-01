@@ -6,6 +6,72 @@ const CATALOG_API_URL = 'https://www.autocatplus.co.uk/mamcat/mamcat.asmx/GetPar
 const USERNAME = 'ASPGWS';
 const PASSWORD = 'FH6NGU54';
 
+// Supplier Name to Prefix mapping
+const SUPPLIER_PREFIX_MAP: Record<string, string> = {
+  'Apec': 'APE',
+  'Autocharge': 'ATU',
+  'Autoelectro': 'AUT',
+  'Banner': 'BAN',
+  'Bettaparts (LPR)': 'BET',
+  'BGA Group': 'BGA',
+  'Blue Print': 'ADL',
+  'BM Catalysts': 'BMC',
+  'Borg & Beck': 'BOR',
+  'Bosch': 'BCS',
+  'Brake Engineering': 'BRA',
+  'Braymann': 'BRA',
+  'BTN': 'BTN',
+  'Cambiare': 'CAM',
+  'Comline': 'COM',
+  'Comma': 'COM',
+  'Corteco': 'COR',
+  'Delphi': 'DLA',
+  'Denso': 'DEN',
+  'Electric-Life': 'ALG',
+  'ElectroSpark': 'CDC',
+  'EuroFlo (Marathon)': 'EUR',
+  'Fahren': 'FAH',
+  'FAI': 'FAI',
+  'Febi': 'FEB',
+  'First Line': 'FIR',
+  'FPS': 'FER',
+  'Fuel Parts (UK)': 'FPT',
+  'Gates': 'GAT',
+  'GS': 'GS',
+  'Hella': 'HGT',
+  'INA': 'INA',
+  'Intermotor': 'INT',
+  'Juratek': 'JUR',
+  'Kilen': 'KIL',
+  'Klarius': 'KLA',
+  'KYB': 'KYB',
+  'Laser Tools': 'LAS',
+  'Lemark': 'FPT',
+  'LUK': 'LUK',
+  'Mahle': 'MAH',
+  'Mintex': 'MIN',
+  'National': 'NAT',
+  'NGK': 'NGK',
+  'Nissens': 'NIS',
+  'NRF': 'NRF',
+  'Numax': 'NUM',
+  'Pearl': 'PEA',
+  'Powertrain': 'POW',
+  'QH': 'QHA',
+  'Red Power': 'BAN',
+  'Ring': 'RIN',
+  'Rollco': 'ROL',
+  'Rolman World': 'RLM',
+  'Sachs (ZF)': 'SAC',
+  'SCM Turbo': 'SCM',
+  'Shaftec': 'SHA',
+  'Somora': 'SOM',
+  'Summit': 'SUM',
+  'Trupart': 'TRU',
+  'Ultraparts': 'ULT',
+  'Valeo': 'VAL',
+};
+
 // CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -210,6 +276,14 @@ function parseDelimitedData(delimitedData: string): CatalogPartInfo | null {
       }
     });
 
+    // Extract supplier code (first 3 characters) and get prefix
+    const supplierField = extendedFields[7] || '';
+    const prefix = SUPPLIER_PREFIX_MAP[supplierField] || '';
+    
+    // Get product code and prepend prefix if available
+    const rawProductCode = extendedFields[38] || '';
+    const productCode = prefix && rawProductCode ? `${prefix}${rawProductCode}` : rawProductCode;
+
     const partInfo: CatalogPartInfo = {
       modelDetails: extendedFields[0] || '',
       yearRange: extendedFields[1] || '',
@@ -217,7 +291,7 @@ function parseDelimitedData(delimitedData: string): CatalogPartInfo | null {
       position: extendedFields[3] || '',
       imageInfo: extendedFields[4] || '',
       section: extendedFields[5] || '',
-      supplier: extendedFields[7] || '',
+      supplier: supplierField,
       description: extendedFields[8] || '',
       exactcc: extendedFields[9] || '',
       cylinders: extendedFields[10] || '',
@@ -230,7 +304,7 @@ function parseDelimitedData(delimitedData: string): CatalogPartInfo | null {
       fuelType: extendedFields[35] || '',
       bodyStyleKey: extendedFields[36] || '',
       mmiKey: extendedFields[37] || '',
-      productCode: extendedFields[38] || '',
+      productCode: productCode,
       v8Key: extendedFields[40] || '',
     };
 
