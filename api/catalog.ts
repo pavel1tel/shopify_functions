@@ -229,6 +229,7 @@ function parseXmlResponse(xmlResponse: string): CatalogPartInfo[] {
       .trim();
 
     const catalogParts: CatalogPartInfo[] = [];
+    const seenParts = new Set<string>();
 
     // Use regex to find AC elements containing part data
     const acRegex = /<AC[^>]*>(.*?)<\/AC>/gis;
@@ -246,13 +247,20 @@ function parseXmlResponse(xmlResponse: string): CatalogPartInfo[] {
         if (dt1Content) {
           const partInfo = parseDelimitedData(dt1Content);
           if (partInfo) {
-            catalogParts.push(partInfo);
+            // Create a unique key for this part based on partNumber and position
+            const partKey = `${partInfo.partNumber}|${partInfo.position}`;
+            
+            // Only add if we haven't seen this part combination before
+            if (!seenParts.has(partKey)) {
+              seenParts.add(partKey);
+              catalogParts.push(partInfo);
+            }
           }
         }
       }
     }
 
-    console.log(`Successfully parsed ${catalogParts.length} catalog parts`);
+    console.log(`Successfully parsed ${catalogParts.length} catalog parts (deduplicated)`);
     return catalogParts;
 
   } catch (error) {
