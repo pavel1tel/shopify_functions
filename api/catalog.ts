@@ -279,19 +279,16 @@ function parseDelimitedData(delimitedData: string): CatalogPartInfo | null {
     // Extract supplier code (first 3 characters) and get prefix
     const supplierField = extendedFields[7] || '';
     const prefix = SUPPLIER_PREFIX_MAP[supplierField] || '';
-    
-    // Get product code and prepend prefix if available
-    const rawProductCode = extendedFields[38] || '';
-    const productCode = prefix && rawProductCode ? `${prefix}${rawProductCode}` : rawProductCode;
+
 
     const partInfo: CatalogPartInfo = {
       modelDetails: extendedFields[0] || '',
       yearRange: extendedFields[1] || '',
-      partNumber: extendedFields[2] || '',
+      partNumber: prefix + extendedFields[2] || '',
       position: extendedFields[3] || '',
       imageInfo: extendedFields[4] || '',
       section: extendedFields[5] || '',
-      supplier: supplierField,
+      supplier: extendedFields[7] || '',
       description: extendedFields[8] || '',
       exactcc: extendedFields[9] || '',
       cylinders: extendedFields[10] || '',
@@ -304,7 +301,7 @@ function parseDelimitedData(delimitedData: string): CatalogPartInfo | null {
       fuelType: extendedFields[35] || '',
       bodyStyleKey: extendedFields[36] || '',
       mmiKey: extendedFields[37] || '',
-      productCode: productCode,
+      productCode: extendedFields[38] || '',
       v8Key: extendedFields[40] || '',
     };
 
