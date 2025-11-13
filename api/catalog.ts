@@ -161,13 +161,13 @@ export default async function handler(req: Request): Promise<Response> {
     formData.append('EngS', '');
     formData.append('FT', '');
 
-    // Make the request to the catalog API with Vercel Data Cache (expires every hour)
+    // Make the request to the catalog API
     const response = await fetch(CATALOG_API_URL, {
       method: 'POST',
       headers: {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'en-US,en;q=0.9,ru;q=0.8,ru-RU;q=0.7',
-        'Cache-Control': 'public, s-maxage=3600', // Cache for 1 hour
+        'Cache-Control': 'max-age=0',
         'Content-Type': 'application/x-www-form-urlencoded',
         'Origin': 'https://www.autocatplus.co.uk',
         'Priority': 'u=0, i',
@@ -183,7 +183,6 @@ export default async function handler(req: Request): Promise<Response> {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36',
       },
       body: formData.toString(),
-      cache: 'default', // Use default caching behavior with Cache-Control header
     });
 
     if (!response.ok) {
@@ -195,11 +194,14 @@ export default async function handler(req: Request): Promise<Response> {
     // Parse the XML response
     const catalogParts = parseXmlResponse(xmlResponse);
 
-    // Return the catalog parts as JSON
+    // Return the catalog parts as JSON with caching headers
     return new Response(JSON.stringify(catalogParts), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300, s-maxage=3600', // Browser: 5 min, CDN: 1 hour
+        'CDN-Cache-Control': 'public, max-age=3600', // Downstream CDNs: 1 hour
+        'Vercel-CDN-Cache-Control': 'public, max-age=7200', // Vercel CDN: 2 hours
         ...corsHeaders,
       },
     });
