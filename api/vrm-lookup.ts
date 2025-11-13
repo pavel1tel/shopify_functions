@@ -65,7 +65,7 @@ export default async function handler(req: Request): Promise<Response> {
       headers: {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'en-US,en;q=0.9,ru;q=0.8,ru-RU;q=0.7',
-        'Cache-Control': 'max-age=43200', // Cache for 12 hours
+        'Cache-Control': 'public, s-maxage=43200', // Cache for 12 hours
         'Content-Type': 'application/x-www-form-urlencoded',
         'Origin': 'https://vrm.mamsoft.co.uk',
         'Priority': 'u=0, i',
